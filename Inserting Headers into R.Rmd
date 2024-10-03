@@ -1,0 +1,42 @@
+---
+title: "inserting headers into an R script"
+author: "Alexandra Akaakar, BSc. MSc"
+date: "2024-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown guide on inserting Headers into an R script to Simplify the beginning of an R workflow.
+
+It is possible to create a default comment header template in r for new scripts using snippets.Edit the snippets file located at Global Options > Code > Edit Snippets 
+
+## IMportant: code below a snippet definition must be indented using tab 
+
+```{r}
+snippet header_script
+  #############################################################
+  ## Project:
+  ## Script purpose:
+  ## Date:  `r paste(Sys.Date())`
+  ## Author:
+  ## load up the packages we will need:  (uncomment as required)
+	
+	require(tidyverse)
+	require(data.table)
+
+	## ---------------------------
+	
+	## Load Functions into Memory
+	
+	# source("functions/summarise_data.R") 
+	
+	## ---------------------------
+  #############################################################
+```
+
+
