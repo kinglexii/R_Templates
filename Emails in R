@@ -1,0 +1,65 @@
+# Load required packages
+library(dplyr)
+library(sendmailR)
+
+# Read CSV file
+assign <- read.csv("your_file.csv", stringsAsFactors = FALSE)
+
+# Filter participants for the current month
+optin <- assign %>%
+  filter(MARAPR == 1)  # Modify column name as needed
+
+# Calculate number of groups
+numGroups <- floor(nrow(optin) / 4)
+
+# Create a vector of group numbers
+bins <- rep(1:numGroups, length.out = nrow(optin))
+
+# Randomly shuffle the dataframe
+optin <- optin[sample(nrow(optin)), ]
+
+# Split into groups
+groups <- split(optin, bins)
+
+# Create email groups
+groupemails <- vector("list", numGroups)
+for (i in 1:numGroups) {
+  groupemails[[i]] <- paste(groups[[i]][["EMAIL"]], collapse = ";")
+}
+
+# Email details
+subject <- "JCP Lunch Group"
+html_body <- function(group_num) {
+  paste0(
+    "<p>Greetings from the JCP Team!<br><br>",
+    "Here are your assigned March/April Lunch Group members.<br><br>",
+    "Remember:<br>",
+    "- A simple coffee catch-up can make a big difference!<br>",
+    "- You don’t need all group members present each time.<br>",
+    "- Feel free to mix and match smaller group outings.<br>",
+    "- Find time to connect virtually or in person.<br><br>",
+    "Pick a day, time, and location that works for you!<br><br>",
+    "Best,<br>JCP Team</p>"
+  )
+}
+
+# Send emails to each group
+for (i in 1:numGroups) {
+  outMail <- list(
+    "To" = groupemails[[i]],
+    "Subject" = subject,
+    "HTMLbody" = html_body(i)
+  )
+
+  try(send.mail(
+    from = "your-email@example.com",
+    to = outMail$`To`,
+    subject = outMail$Subject,
+    body = outMail$HTMLbody,
+    smtp = list(host.name = "smtp.gmail.com", port = 465L, ssl = TRUE),
+    authenticate = "your-email@example.com",
+    password = "your-password"
+  ))
+}
+
+print("Emails sent successfully!")
