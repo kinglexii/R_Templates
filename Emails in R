@@ -63,3 +63,49 @@ for (i in 1:numGroups) {
 }
 
 print("Emails sent successfully!")
+
+
+
+
+
+
+
+
+
+
+
+-----
+
+
+
+# Load required libraries
+library(dplyr)
+library(sendmailR)
+
+# Read CSV file
+df <- read.csv("your_file.csv", stringsAsFactors = FALSE)
+
+# Shuffle and assign to groups
+set.seed(123)  # Ensure reproducibility
+df <- df[sample(nrow(df)), ]  # Shuffle rows
+df$Group <- rep(1:4, length.out = nrow(df))  # Assign to 4 groups
+
+# Define the email details
+subject <- "Important Group Update"
+body <- "Dear Team,\n\nThis is your assigned group notification. Stay tuned for further instructions!\n\nBest,\nYour Team"
+
+# Email sender and SMTP settings (Modify as per your email provider)
+from <- "your_email@example.com"
+smtp_server <- list(smtpServer = "smtp.yourprovider.com")
+
+# Send emails to each group
+for (group_num in unique(df$Group)) {
+  group_members <- df[df$Group == group_num, ]
+  recipients <- paste(group_members$Email, collapse = ", ")
+  
+  # Create and send the email
+  mail <- mime_part(body)
+  sendmail(from = from, to = recipients, subject = subject, msg = mail, control = smtp_server)
+}
+
+print("Emails sent successfully!")
