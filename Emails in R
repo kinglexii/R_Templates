@@ -109,3 +109,60 @@ for (group_num in unique(df$Group)) {
 }
 
 print("Emails sent successfully!")
+
+
+
+
+
+------
+
+
+
+
+library(dplyr)
+library(sendmailR)
+
+# Read CSV file
+assign <- read.csv("participants.csv")
+
+# Filter only those participating this month
+optin <- assign %>% filter(MARAPR == 1)  # Adjust filter for the current month
+
+# Calculate number of groups (assume groups of 4)
+numGroups <- floor(nrow(optin) / 4)
+
+# Create a vector of group numbers
+bins <- rep(1:numGroups, each = 4, length.out = nrow(optin))
+
+# Randomly rearrange dataframe
+optin <- optin[sample(nrow(optin)), ]
+
+# Assign individuals to groups
+groups <- split(optin, bins)
+
+# Generate email groups
+groupemails <- lapply(groups, function(group) paste(group$EMAIL, collapse = ";"))
+
+# Send emails
+smtpServer <- list(host.name = "smtp.gmail.com", port = 465, ssl = TRUE)
+
+for (i in seq_along(groupemails)) {
+  email_body <- paste0(
+    "<p>Greetings!<br><br>",
+    "You have been grouped for this month's lunch gathering.<br>",
+    "Here are your group members: ", groupemails[[i]], "<br><br>",
+    "Coordinate a time that works best for you all!<br>",
+    "Best wishes,<br>JCP Team</p>"
+  )
+
+  try(send.mail(
+    from = "your-email@example.com",
+    to = groupemails[[i]],
+    subject = "JCP Lunch Group",
+    body = email_body,
+    smtp = smtpServer,
+    authenticate = TRUE,
+    username = "your-email@example.com",
+    password = "your-password"
+  ))
+}
